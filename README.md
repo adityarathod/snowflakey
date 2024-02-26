@@ -2,7 +2,10 @@
 
 A tiny library to implement [Snowflake IDs](https://en.wikipedia.org/wiki/Snowflake_ID) in Golang.
 
-I'm not the best Go programmer, so contributions welcome!
+I'm still learning Golang and its best practices, so contributions welcome!
+
+## Usage
+See the provided [examples](./examples/).
 
 ## Supported implementations
 ### Original (Twitter) snowflake
