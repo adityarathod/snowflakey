@@ -16,3 +16,6 @@
 
 # Go workspace file
 go.work
+
+# macOS oddities
+.DS_Store
