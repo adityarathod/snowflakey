@@ -2,7 +2,8 @@ package original
 
 import "errors"
 
-type Definition struct {
+// Represents the data encoded in a snowflake.
+type Data struct {
 	// Time since the snowflake's epoch, in milliseconds
 	EpochTimeMillis int64
 	// The ID of the machine that generated the snowflake
@@ -12,7 +13,7 @@ type Definition struct {
 }
 
 // Validates the epoch time. It must be non-negative and fit within 41 bits.
-func (def *Definition) ValidateEpochTimeMillis() error {
+func (def *Data) ValidateEpochTimeMillis() error {
 	if def.EpochTimeMillis < 0 {
 		return errors.New("epoch time must be non-negative")
 	}
@@ -23,7 +24,7 @@ func (def *Definition) ValidateEpochTimeMillis() error {
 }
 
 // Validates the machine ID. It must be non-negative and fit within 10 bits.
-func (def *Definition) ValidateMachineID() error {
+func (def *Data) ValidateMachineID() error {
 	if def.MachineID < 0 {
 		return errors.New("machine ID must be non-negative")
 	}
@@ -34,7 +35,7 @@ func (def *Definition) ValidateMachineID() error {
 }
 
 // Validates the sequence number. It must be non-negative and fit within 12 bits.
-func (def *Definition) ValidateSequenceNumber() error {
+func (def *Data) ValidateSequenceNumber() error {
 	if def.SequenceNumber < 0 {
 		return errors.New("sequence number must be non-negative")
 	}
@@ -44,7 +45,7 @@ func (def *Definition) ValidateSequenceNumber() error {
 	return nil
 }
 
-func (def *Definition) ValidateAll() error {
+func (def *Data) Validate() error {
 	return errors.Join(
 		def.ValidateEpochTimeMillis(),
 		def.ValidateMachineID(),

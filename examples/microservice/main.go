@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adityarathod/snowflakey/pkg/original"
-	"github.com/adityarathod/snowflakey/pkg/utils"
+	"github.com/adityarathod/snowflakey/epoch"
+	"github.com/adityarathod/snowflakey/original"
 )
 
 /**
@@ -19,14 +19,14 @@ import (
 
 var defaultEpoch = time.Date(2022, time.November, 30, 19, 38, 0, 0, time.UTC)
 
-type SnowflakeGeneratorCtx struct {
-	EpochHelper *utils.SnowflakeEpoch
-	MachineID   int16
-	Port        int
-	SequenceID  int16
+type SnowflakeGeneratorGlobals struct {
+	Epoch      *epoch.Epoch
+	MachineID  int16
+	Port       int
+	SequenceID int16
 }
 
-var ctx *SnowflakeGeneratorCtx
+var globals *SnowflakeGeneratorGlobals
 
 // Parses command line flags and initializes the snowflake generator context.
 func initCtx() {
@@ -35,12 +35,12 @@ func initCtx() {
 	port := flag.Int("port", 4040, "The port to listen on for HTTP requests")
 	flag.Parse()
 
-	ctx = &SnowflakeGeneratorCtx{
-		EpochHelper: utils.NewSnowflakeEpoch(*epochMillis),
-		MachineID:   int16(*machineID),
-		Port:        *port,
+	globals = &SnowflakeGeneratorGlobals{
+		Epoch:     epoch.New(*epochMillis),
+		MachineID: int16(*machineID),
+		Port:      *port,
 	}
-	slog.Info("Initialized snowflake generator context", "ctx", ctx)
+	slog.Info("Initialized snowflake generator globals", "ctx", globals)
 }
 
 // Main HTTP request handler.
@@ -50,17 +50,17 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-	definition := &original.Definition{
-		EpochTimeMillis: ctx.EpochHelper.GenerateEpochTimeMillis(),
-		MachineID:       ctx.MachineID,
-		SequenceNumber:  ctx.SequenceID,
+	definition := &original.Data{
+		EpochTimeMillis: globals.Epoch.GenerateEpochTimeMillis(),
+		MachineID:       globals.MachineID,
+		SequenceNumber:  globals.SequenceID,
 	}
-	err := definition.ValidateAll()
+	err := definition.Validate()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Invalid snowflake definition: %v", err), http.StatusInternalServerError)
 		return
 	}
-	ctx.SequenceID++
+	globals.SequenceID++
 	snowflake := original.Generate(definition)
 	slog.Info("Generated snowflake", slog.Int64("snowflake", snowflake), "definition", fmt.Sprintf("%+v", definition))
 	fmt.Fprintf(w, "%d", snowflake)
@@ -69,6 +69,6 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 func main() {
 	initCtx()
 	http.HandleFunc("/", handleRequest)
-	slog.Info("Listening for HTTP requests", "port", ctx.Port)
-	http.ListenAndServe(fmt.Sprintf(":%d", ctx.Port), nil)
+	slog.Info("Listening for HTTP requests", "port", globals.Port)
+	http.ListenAndServe(fmt.Sprintf(":%d", globals.Port), nil)
 }

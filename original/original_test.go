@@ -4,7 +4,7 @@ import "testing"
 
 const wikipediaExampleSnowflake = 1541815603606036480
 
-var wikipediaExampleInfo = &Definition{
+var wikipediaExampleInfo = &Data{
 	EpochTimeMillis: 367597485448,
 	MachineID:       378,
 	SequenceNumber:  0,

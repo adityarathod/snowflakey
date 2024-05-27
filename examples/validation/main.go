@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/adityarathod/snowflakey/pkg/original"
-	"github.com/adityarathod/snowflakey/pkg/utils"
+	"github.com/adityarathod/snowflakey/epoch"
+	"github.com/adityarathod/snowflakey/original"
 )
 
 /**
@@ -14,10 +14,10 @@ import (
 
 // Date significantly in the future, to generate negative snowflake epoch times
 var epochDate = time.Date(2050, time.January, 1, 0, 0, 0, 0, time.UTC)
-var epochHelper = utils.NewSnowflakeEpoch(epochDate.UnixMilli())
+var epochHelper = epoch.New(epochDate.UnixMilli())
 
 func main() {
-	definition := &original.Definition{
+	definition := &original.Data{
 		// This will generate a negative number
 		EpochTimeMillis: epochHelper.GenerateEpochTimeMillis(),
 		// This is outside the 10-bit range
@@ -26,6 +26,6 @@ func main() {
 		SequenceNumber: 6000,
 	}
 	fmt.Printf("Snowflake definition: %+v\n", definition)
-	err := definition.ValidateAll()
+	err := definition.Validate()
 	fmt.Printf("Validation error(s):\n%v\n", err)
 }
